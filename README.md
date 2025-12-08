@@ -19,13 +19,6 @@ NAME:
 USAGE:
    mosquitto_exporter [global options] command [command options] [arguments...]
 
-VERSION:
-   0.6.0 (0ac92b5), go1.14.2
-
-AUTHORS:
-   Arturo Reuschenbach Puncernau <a.reuschenbach.puncernau@sap.com>
-   Fabian Ruff <fabian.ruff@sap.com>
-
 COMMANDS:
      help, h  Shows a list of commands or help for one command
 

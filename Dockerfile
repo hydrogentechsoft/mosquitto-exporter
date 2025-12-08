@@ -1,4 +1,4 @@
-FROM golang:1.17-buster AS build
+FROM registry.gregdev.dev/docker-hub/golang:1.25.5 AS development
 
 WORKDIR /go/src/app
 
@@ -9,13 +9,15 @@ RUN go mod download
 
 COPY . .
 
-RUN make build
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o /mosquitto-exporter ./*.go
+RUN chmod a+x /mosquitto-exporter
 
-FROM scratch
-LABEL source_repository="https://github.com/sapcc/mosquitto-exporter"
+FROM registry.gregdev.dev/docker-hub/alpine:3.23.0 AS app
 
-COPY --from=build /go/src/app/bin/mosquitto_exporter /mosquitto_exporter
+USER 1234:1234
+
+COPY --from=development /mosquitto-exporter /mosquitto-exporter
 
 EXPOSE 9234
 
-ENTRYPOINT [ "/mosquitto_exporter" ]
+ENTRYPOINT [ "/mosquitto-exporter" ]

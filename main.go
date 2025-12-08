@@ -9,8 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"crypto/tls"
-
 	"github.com/codegangsta/cli"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/prometheus/client_golang/prometheus"
@@ -55,16 +53,6 @@ func main() {
 
 	app.Name = appName
 	app.Version = versionString()
-	app.Authors = []cli.Author{
-		{
-			Name:  "Arturo Reuschenbach Puncernau",
-			Email: "a.reuschenbach.puncernau@sap.com",
-		},
-		{
-			Name:  "Fabian Ruff",
-			Email: "fabian.ruff@sap.com",
-		},
-	}
 	app.Usage = "Prometheus exporter for broker metrics"
 	app.Action = runServer
 	app.Flags = []cli.Flag{
@@ -93,18 +81,6 @@ func main() {
 			EnvVar: "MQTT_PASS",
 		},
 		cli.StringFlag{
-			Name:   "cert,c",
-			Usage:  "Location of a TLS certificate .pem file for the Mosquitto message broker",
-			Value:  "",
-			EnvVar: "MQTT_CERT",
-		},
-		cli.StringFlag{
-			Name:   "key,k",
-			Usage:  "Location of a TLS private key .pem file for the Mosquitto message broker",
-			Value:  "",
-			EnvVar: "MQTT_KEY",
-		},
-		cli.StringFlag{
 			Name:   "client-id,i",
 			Usage:  "Client id to be used to connect to the Mosquitto message broker",
 			Value:  "",
@@ -119,7 +95,9 @@ func runServer(c *cli.Context) {
 	log.Printf("Starting mosquitto_broker %s", versionString())
 
 	opts := mqtt.NewClientOptions()
+	opts.SetAutoReconnect(true)
 	opts.SetCleanSession(true)
+	opts.SetOrderMatters(false)
 	opts.AddBroker(c.String("endpoint"))
 
 	if c.String("client-id") != "" {
@@ -133,26 +111,7 @@ func runServer(c *cli.Context) {
 			opts.SetPassword(c.String("pass"))
 		}
 	}
-	// if you have a client certificate you want a key aswell
-	if c.String("cert") != "" && c.String("key") != "" {
-		keyPair, err := tls.LoadX509KeyPair(c.String("cert"), c.String("key"))
-		if err != nil {
-			log.Printf("Failed to load certificate/keypair: %s", err)
-		}
-		tlsConfig := &tls.Config{
-			Certificates:       []tls.Certificate{keyPair},
-			InsecureSkipVerify: true,
-			ClientAuth:         tls.NoClientCert,
-		}
-		opts.SetTLSConfig(tlsConfig)
-		if !strings.HasPrefix(c.String("endpoint"), "ssl://") &&
-			!strings.HasPrefix(c.String("endpoint"), "tls://") {
-			log.Println("Warning: To use TLS the endpoint URL will have to begin with 'ssl://' or 'tls://'")
-		}
-	} else if (c.String("cert") != "" && c.String("key") == "") ||
-		(c.String("cert") == "" && c.String("key") != "") {
-		log.Println("Warning: For TLS to work both certificate and private key are needed. Skipping TLS.")
-	}
+	log.Println(opts)
 
 	opts.OnConnect = func(client mqtt.Client) {
 		log.Printf("Connected to %s", c.String("endpoint"))

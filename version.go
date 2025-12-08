@@ -1,15 +1,9 @@
 package main
 
-import (
-	"fmt"
-	"runtime"
-)
-
 var (
-	Version   = "develop"
-	GITCOMMIT = "HEAD"
+	Version = "v0.0.7"
 )
 
 func versionString() string {
-	return fmt.Sprintf("%s (%s), %s", Version, GITCOMMIT, runtime.Version())
+	return Version
 }
