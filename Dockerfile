@@ -1,4 +1,4 @@
-FROM registry.gregdev.dev/docker-hub/golang:1.25.5 AS development
+FROM golang:1.25.5 AS development
 
 WORKDIR /go/src/app
 
@@ -12,7 +12,7 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o /mosquitto-exporter ./*.go
 RUN chmod a+x /mosquitto-exporter
 
-FROM registry.gregdev.dev/docker-hub/alpine:3.23.0 AS app
+FROM alpine:3.23.2 AS app
 
 USER 1234:1234
 
