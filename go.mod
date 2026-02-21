@@ -1,4 +1,4 @@
-module github.com/sapcc/mosquitto-exporter
+module github.com/hydrogentechsoft/mosquitto-exporter
 
 go 1.26.0
 
