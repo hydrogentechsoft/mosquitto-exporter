@@ -1,4 +1,4 @@
-FROM golang:1.26.0 AS development
+FROM golang:1.26.1 AS development
 
 WORKDIR /go/src/app
 
@@ -12,11 +12,9 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o /mosquitto-exporter ./*.go
 RUN chmod a+x /mosquitto-exporter
 
-FROM alpine:3.23.3 AS app
+FROM gcr.io/distroless/static-debian13:nonroot AS app
 
-USER 1234:1234
-
-COPY --from=development /mosquitto-exporter /mosquitto-exporter
+COPY --from=development --chown=nonroot:nonroot /mosquitto-exporter /mosquitto-exporter
 
 EXPOSE 9234
 
