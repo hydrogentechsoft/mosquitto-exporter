@@ -1,4 +1,4 @@
-IMAGE ?= registry.gregdev.dev/hydrogentech/mosquitto-exporter
+IMAGE ?= registry.gregdev.dev/library/mosquitto-exporter
 VERSION := $(shell grep -E 'Version\s*=\s*"' version.go | sed -E 's/.*"([^"]+)".*/\1/')
 
 .PHONY: version build push release
